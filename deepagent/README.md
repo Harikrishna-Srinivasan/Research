@@ -6,7 +6,8 @@ Plans tasks, executes them, reviews its own work, creates new tools on the fly.
 ## Install
 
 ```bash
-cd d:\research\deepagent
+cd research
+cd deepagent
 pip install .
 ```
 
