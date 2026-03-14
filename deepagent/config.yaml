@@ -1,0 +1,64 @@
+# DeepAgent Configuration
+# Edit this file to customize your agent's behavior.
+
+llm:
+  # Primary model — state-of-the-art, downloaded on first run
+  model_id: "google/gemma-3-4b-it"
+  # Alternatives (uncomment one):
+  #   model_id: "Qwen/Qwen3.5-9B"
+  #   model_id: "Qwen/Qwen3-Coder-Next"
+  #   model_id: "mistralai/Ministral-8B-Instruct-2412"
+  #   model_id: "meta-llama/Llama-3.1-8B-Instruct"
+
+  # Quantization: "none" (CPU-friendly), "4bit", or "8bit"
+  quantization: "none"
+  # Max context length (tokens)
+  context_length: 8192
+  # Generation temperature
+  temperature: 0.7
+  # Max new tokens per generation
+  max_new_tokens: 1024
+  # Device: "cpu", "cuda", "auto"
+  device: "cpu"
+
+agent:
+  # Max ReAct iterations per sub-task
+  max_iterations: 50
+  # Max total time for entire task (minutes)
+  max_time_minutes: 180
+  # Enable the Critic agent for self-review
+  enable_critic: true
+  # Alert user on potential breakthroughs
+  enable_breakthrough_detection: true
+  # Enable dynamic tool creation by the agent
+  enable_tool_creation: true
+
+memory:
+  # Tokens reserved for short-term sliding window
+  short_term_tokens: 4096
+  # Directory for persistent ChromaDB vector store
+  long_term_db_path: "./memory_store"
+  # Embedding model for semantic search
+  embedding_model: "all-MiniLM-L6-v2"
+
+tools:
+  # Directories the agent is allowed to read/write
+  workspace_dirs: ["./workspace"]
+  # Commands the agent is allowed to execute
+  allowed_commands: ["python", "pip", "node", "npm", "npx", "git", "curl", "wget"]
+  # Dangerous patterns that are always blocked
+  blocked_patterns: ["rm -rf /", "format c:", "del /s /q c:", ":(){ :|:& };:"]
+  # Enable web search tools
+  web_search_enabled: true
+  # Max seconds for a single shell command
+  max_command_timeout: 300
+  # Directory where dynamically created tools are stored
+  custom_tools_dir: "./custom_tools"
+
+safety:
+  # Ask user before destructive operations (delete, format, etc.)
+  confirm_destructive: true
+  # Automatically clean up installed packages/files on task end
+  auto_cleanup: true
+  # Max file size the agent can create (MB)
+  max_file_size_mb: 100
