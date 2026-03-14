@@ -9,12 +9,12 @@ from typing import Optional, Any
 
 @dataclass
 class LLMConfig:
-    model_id: str = "Qwen/Qwen3.5-9B"
+    model_id: str = "google/gemma-3-4b-it"
     quantization: str = "none"  # "4bit", "8bit", "none"
     context_length: int = 8192
-    temperature: float = 0.6
-    max_new_tokens: int = 2048
-    device: str = "auto"
+    temperature: float = 0.7
+    max_new_tokens: int = 1024
+    device: str = "cpu"
 
 
 @dataclass

@@ -1,6 +1,6 @@
 # DeepAgent
 
-Autonomous research agent — uses HuggingFace Open-Source model with MCP tools.
+CPU friendly Autonomous research agent — uses HuggingFace Open-Source model with MCP tools.
 Plans tasks, executes them, reviews its own work, creates new tools on the fly.
 
 ## Install
@@ -32,8 +32,8 @@ Edit `config.yaml` to change model, tools, or safety settings:
 
 ```yaml
 llm:
-  model_id: "Qwen/Qwen3.5-9B"   # swap any HF model here
-  quantization: "4bit"            # "4bit", "8bit", or "none"
+  model_id: "google/gemma-3-4b-it" # swap any HF model here
+  quantization: "none"             # "4bit", "8bit", or "none"
 ```
 
 ## Architecture
