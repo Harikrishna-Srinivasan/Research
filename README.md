@@ -1,33 +1,55 @@
 # Autonomous Research Agent (DeepAgent)
 
 ## Overview
-A framework for building truly autonomous AI agents capable of conducting large-scale, complex research and development tasks. Built exclusively on open-source models using Transformers and the Model Context Protocol (MCP), this framework is designed to be highly accessible and CPU-friendly, empowering users to execute ambitious projects without requiring massive compute clusters.
+
+**DeepAgent** is a framework for building truly autonomous AI agents capable of handling large, complex research and development tasks. It runs entirely on open-source models using **Transformers** and the **Model Context Protocol (MCP)**.
+
+_The goal is simple: make powerful autonomous AI accessible to everyone._ DeepAgent is designed to run efficiently even on modest hardware, so you can experiment with ambitious ideas without needing massive compute clusters.
+
+---
 
 ## Key Capabilities & Experimental Use Cases (Examples)
 
 ### 💻 Full-Stack Development & Engineering
-- **Freelance Engine**: Autonomously build end-to-end full-stack projects based on high-level user intents.
-- **Platform Generation**: Create complex platforms (e.g., social media apps like WhatsApp) entirely utilizing free tiers of services like Vercel. The agent automatically installs necessary dependencies, provisions resources, and intelligently cleans them up upon failure (unless explicitly instructed to persist).
+
+* **Freelance Engine** – Turn high-level ideas into fully built full-stack projects automatically.
+* **Platform Generation** – Create complex platforms (for example, social media apps similar to WhatsApp) using free infrastructure like Vercel.
+  The agent installs dependencies, provisions resources, and even cleans up automatically if something fails—unless you ask it to keep them.
 
 ### 🧮 Advanced Mathematics & Prime Hunting
-- **Prime Number Discovery**: Search for the largest prime numbers using pattern analysis on Mersenne prime occurrence, approximation methods, and the Lucas-Lehmer test.
-- **Hardware Optimization**: Dynamically toggle between CPU and GPU compute based on user preference and hardware availability.
-- **Breakthrough Alerts**: Automatically notify users if the agent discovers novel, faster algorithms for deciding prime properties ($M_p$) compared to existing Lucas-Lehmer standards or other current algorithms.
+
+* **Prime Number Discovery** – Search for extremely large prime numbers using techniques like Mersenne prime pattern analysis, approximation methods, and the Lucas–Lehmer test.
+* **Hardware Optimization** – Automatically switch between CPU and GPU depending on what’s available and what the user prefers.
+* **Breakthrough Alerts** – Notify the user if a new, faster algorithm for testing prime properties (such as (M_p)) is discovered that improves on current methods.
 
 ### 🔬 AI Research & Architecture Innovation
-- **Literature Review & Synthesis**: Continuously read and analyze the latest research papers from FAANG companies, arXiv, journals, trending news, and Hugging Face.
-- **Model Improvement & Creation**: Apply synthesized knowledge to improve existing models or architect new ones (e.g., highly efficient training/inference mechanisms, nested deep learning structures similar to DeepSeek).
-- **Architecture Alerts**: Proactively alert the user upon the discovery of ground-breaking architectural designs (e.g., recursive graph of thoughts) during literature reviews or autonomous experimentation.
+
+* **Literature Review & Synthesis** – Continuously analyze research papers from arXiv, major tech companies, journals, news, and Hugging Face.
+* **Model Improvement & Creation** – Use these insights to improve existing models or design entirely new architectures (for example, efficient training/inference pipelines or nested deep-learning structures).
+* **Architecture Alerts** – Inform the user when potentially groundbreaking ideas emerge during research or experimentation (such as novel reasoning architectures).
 
 ### ⚙️ Hardware & Compute Acceleration
-- **Novel Chip Design**: Research and propose new chip architectures potentially outperforming existing GPUs, leveraging existing computing knowledge and accurate simulations to demonstrate their potential power.
-- **Compute Generation**: Write custom CUDA kernels or novel CPU acceleration methods to handle heavy computational lifts—such as performing full-scale inference of massive models (e.g., GPT-5 class) or large model training locally on consumer hardware.
+
+* **Novel Chip Design** – Explore and simulate new chip architectures that could potentially outperform current GPU designs.
+* **Compute Generation** – Write custom CUDA kernels or CPU acceleration techniques to handle heavy computation, including large-model inference or local model training.
 
 ### 🧠 Psychology-Driven Design & Gamification
-- **Behavioral Analysis**: Analyze human psychology based on social media content, engagement metrics (likes, dislikes, comments), and responses.
-- **User-Centric Web Design**: Apply psychological insights to design visually amazing, highly engaging websites and UI components tailored to specific target audiences.
-- **Complex Game Development & EdTech**: Create sophisticated games (up to AAA level) or gamified educational applications designed to optimally teach and engage students based on proven cognitive principles.
+
+* **Behavioral Analysis** – Study engagement patterns from social platforms (likes, comments, reactions) to better understand human behavior.
+* **User-Centric Web Design** – Apply those insights to design beautiful, engaging interfaces tailored to specific audiences.
+* **Games & EdTech** – Create sophisticated games or gamified educational platforms designed to teach effectively using cognitive and behavioral principles.
+
+---
 
 ## Architecture
-- **Models**: Native integration with open-source Transformers (heavily optimized for CPU/GPU).
-- **Tools**: Model Context Protocol (MCP) for dynamic tool creation, seamless system interaction, and robust automated resource management.
+
+* **Models** – Native support for open-source Transformers, optimized for CPU environments.
+* **Tools** – The **Model Context Protocol (MCP)** enables dynamic tool creation, system interaction, and automated resource management.
+
+---
+
+## LICENSE
+
+This project is licensed under the Apache License 2.0. See the [LICENSE](LICENSE) file for detailed information.
+
+Additional attribution details can be found in the [NOTICE](NOTICE) file.
