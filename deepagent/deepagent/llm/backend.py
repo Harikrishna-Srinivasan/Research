@@ -53,49 +53,67 @@ class TransformersBackend(LLMBackend):
 
     def __init__(self, cfg: LLMConfig):
         import torch
+        import os
+        from dotenv import load_dotenv
         from transformers import AutoModelForCausalLM, AutoTokenizer
 
+        # Load environment variables (.env) - search up one level if not found
+        if not load_dotenv():
+            parent_env = os.path.join(os.path.dirname(os.getcwd()), ".env")
+            load_dotenv(parent_env)
+            
+        hf_token = os.getenv("HF_TOKEN")
+        if not hf_token:
+            log.warning("HF_TOKEN not found in environment. Access to gated models (e.g. Gemma) may fail.")
+
         self.cfg = cfg
-        log.info("Loading model %s (quant=%s) …", cfg["model_id"], cfg["quantization"])
+        log.info("Loading model %s (quant=%s) …", cfg.model_id, cfg.quantization)
         start = time.time()
 
-        # ---------- tokenizer ----------
-        self.tokenizer = AutoTokenizer.from_pretrained(
-            cfg["model_id"], trust_remote_code=True
-        )
-        if self.tokenizer.pad_token_id is None:
-            self.tokenizer.pad_token = self.tokenizer.eos_token
-        if self.tokenizer.padding_side != "left":
-            self.tokenizer.padding_side = "left"
-
-        # ---------- quantization config ----------
+        # ---------- quantization & CPU Optimization ----------
+        # Note: BitsAndBytes 4-bit is not natively supported on Windows CPU.
+        # We manually use bfloat16 or float32 for model weights to save RAM/Time.
         load_kwargs: dict[str, Any] = {
             "trust_remote_code": True,
-            "device_map": cfg["device"] if cfg["device"] != "auto" else "cpu",
+            "device_map": "cpu", # Force CPU-only
+            "torch_dtype": torch.bfloat16 if torch.cuda.is_available() or hasattr(torch, 'bfloat16') else torch.float32,
+            "low_cpu_mem_usage": True
         }
 
-        if cfg["quantization"] == "4bit":
-            from transformers import BitsAndBytesConfig
-
-            load_kwargs["quantization_config"] = BitsAndBytesConfig(
-                load_in_4bit=True,
-                bnb_4bit_compute_dtype=torch.float16,
-                bnb_4bit_quant_type="nf4",
-                bnb_4bit_use_double_quant=True,
+        # ---------- tokenizer and model with offline-first local cache checking ----------
+        try:
+            log.info("Checking local cache purely offline before hitting HF...")
+            self.tokenizer = AutoTokenizer.from_pretrained(
+                cfg.model_id, trust_remote_code=True, local_files_only=True, token=hf_token
             )
-        elif cfg["quantization"] == "8bit":
-            from transformers import BitsAndBytesConfig
+            if self.tokenizer.pad_token_id is None:
+                self.tokenizer.pad_token = self.tokenizer.eos_token
+            if self.tokenizer.padding_side != "left":
+                self.tokenizer.padding_side = "left"
+                
+            self.model = AutoModelForCausalLM.from_pretrained(
+                cfg.model_id, local_files_only=True, token=hf_token, **load_kwargs
+            )
+            log.info("Transformers model acquired offline.")
+        except Exception as offline_e:
+            log.info(f"Local models not found ({offline_e}). Dynamically downloading from HuggingFace...")
+            self.tokenizer = AutoTokenizer.from_pretrained(
+                cfg.model_id, trust_remote_code=True, local_files_only=False, token=hf_token
+            )
+            if self.tokenizer.pad_token_id is None:
+                self.tokenizer.pad_token = self.tokenizer.eos_token
+            if self.tokenizer.padding_side != "left":
+                self.tokenizer.padding_side = "left"
+                
+            self.model = AutoModelForCausalLM.from_pretrained(
+                cfg.model_id, local_files_only=False, token=hf_token, **load_kwargs
+            )
 
-            load_kwargs["quantization_config"] = BitsAndBytesConfig(load_in_8bit=True)
-        else:
-            load_kwargs["dtype"] = torch.bfloat16
-
-        # ---------- model ----------
-        self.model = AutoModelForCausalLM.from_pretrained(cfg['model_id'], **load_kwargs)
         if self.model.generation_config.pad_token_id is None:
             self.model.generation_config.pad_token_id = self.tokenizer.pad_token_id
         if self.model.generation_config.eos_token_id is None:
             self.model.generation_config.eos_token_id = self.tokenizer.eos_token_id
+            
         elapsed = time.time() - start
         log.info("Model loaded in %.1f s", elapsed)
 
@@ -112,9 +130,9 @@ class TransformersBackend(LLMBackend):
             try:
                 out = self.model.generate(
                     **inputs,
-                    max_new_tokens=kwargs.get("max_new_tokens", self.cfg["max_new_tokens"]),
-                    temperature=kwargs.get("temperature", self.cfg["temperature"]),
-                    do_sample=kwargs.get("temperature", self.cfg["temperature"]) > 0,
+                    max_new_tokens=kwargs.get("max_new_tokens", self.cfg.max_new_tokens),
+                    temperature=kwargs.get("temperature", self.cfg.temperature),
+                    do_sample=kwargs.get("temperature", self.cfg.temperature) > 0,
                     top_p=kwargs.get("top_p", 0.9),
                     pad_token_id=self.tokenizer.eos_token_id,
                 )
@@ -229,10 +247,93 @@ class TransformersBackend(LLMBackend):
 
 
 # ---------------------------------------------------------------------------
+# LlamaCpp Backend
+# ---------------------------------------------------------------------------
+class LlamaCppBackend(LLMBackend):
+    """Uses llama-cpp-python to load GGUF models directly into RAM.
+    Supports dynamic loading and unloading to preserve memory.
+    """
+
+    def __init__(self, cfg: LLMConfig):
+        self.cfg = cfg
+        self.model = None
+        self.current_model_path = None
+
+    def load_model(self, model_path: str):
+        import gc
+        import time
+        from llama_cpp import Llama
+        from deepagent.config import resolve_model_path
+
+        # Resolve model path (download from HF if needed)
+        resolved_path = resolve_model_path(model_path)
+
+        if self.model is not None and self.current_model_path == resolved_path:
+            return  # Already loaded
+
+        if self.model is not None:
+            self.unload_model()
+
+        log.info("Loading LlamaCpp model from %s ...", resolved_path)
+        start = time.time()
+        self.model = Llama(
+            model_path=resolved_path,
+            n_ctx=self.cfg.llama_cpp.n_ctx,
+            n_threads=self.cfg.llama_cpp.n_threads,
+            n_gpu_layers=self.cfg.llama_cpp.n_gpu_layers,
+            verbose=False,
+        )
+        self.current_model_path = resolved_path
+        elapsed = time.time() - start
+        log.info("Model loaded in %.1f s", elapsed)
+
+    def unload_model(self):
+        import gc
+        if self.model is not None:
+            log.info("Unloading model %s to free RAM ...", self.current_model_path)
+            del self.model
+            self.model = None
+            self.current_model_path = None
+            gc.collect()
+
+    def generate(self, messages: list[dict], **kwargs) -> str:
+        if self.model is None:
+            self.load_model(self.cfg.llama_cpp.model_path)
+
+        response_format = kwargs.pop("response_format", None)
+
+        out = self.model.create_chat_completion(
+            messages=messages,
+            max_tokens=kwargs.get("max_new_tokens", self.cfg.max_new_tokens),
+            temperature=kwargs.get("temperature", self.cfg.temperature),
+            top_p=kwargs.get("top_p", 0.9),
+            response_format=response_format,
+        )
+        return out["choices"][0]["message"]["content"].strip()
+
+    def generate_with_tools(
+        self, messages: list[dict], tools: list[dict], **kwargs
+    ) -> dict:
+        tool_description = TransformersBackend._format_tools_for_prompt(tools)
+        augmented = TransformersBackend._inject_tool_prompt(messages, tool_description)
+        raw = self.generate(augmented, **kwargs)
+        return TransformersBackend._parse_tool_response(raw)
+
+    def count_tokens(self, text: str) -> int:
+        if self.model is None:
+            return len(text) // 4  # rough estimate if unloaded
+        return len(self.model.tokenize(text.encode("utf-8")))
+
+
+# ---------------------------------------------------------------------------
 # Factory
 # ---------------------------------------------------------------------------
 def create_backend(cfg: Optional[LLMConfig] = None) -> LLMBackend:
     """Instantiate the appropriate backend from config."""
     if cfg is None:
         cfg = LLMConfig()
+
+    if hasattr(cfg, 'backend_type') and cfg.backend_type == "llama_cpp":
+        return LlamaCppBackend(cfg)
+
     return TransformersBackend(cfg)

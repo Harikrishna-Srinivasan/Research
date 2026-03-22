@@ -95,7 +95,7 @@ class ToolRegistry:
             source="meta",
         )
 
-        if self.config.agent["enable_tool_creation"]:
+        if self.config.agent.enable_tool_creation:
             self.register(
                 "create_tool",
                 "Create a new reusable tool from Python code. The code must define a function "
@@ -135,7 +135,7 @@ class ToolRegistry:
                     pass
 
         # Save to disk
-        tools_dir = Path(self.config.tools["custom_tools_dir"]).resolve()
+        tools_dir = Path(self.config.tools.custom_tools_dir).resolve()
         tools_dir.mkdir(parents=True, exist_ok=True)
         tool_path = tools_dir / f"{name}.py"
         tool_path.write_text(code, encoding="utf-8")
@@ -164,7 +164,7 @@ class ToolRegistry:
 
     def _load_custom_tools(self) -> None:
         """Load previously created custom tools from disk."""
-        tools_dir = Path(self.config.tools["custom_tools_dir"]).resolve()
+        tools_dir = Path(self.config.tools.custom_tools_dir).resolve()
         if not tools_dir.exists():
             return
 
@@ -208,10 +208,10 @@ class ToolRegistry:
 
         # Inject config-based safety params where applicable
         if name == "run_command":
-            arguments.setdefault("allowed_commands", self.config.tools["allowed_commands"])
-            arguments.setdefault("blocked_patterns", self.config.tools["blocked_patterns"])
+            arguments.setdefault("allowed_commands", self.config.tools.allowed_commands)
+            arguments.setdefault("blocked_patterns", self.config.tools.blocked_patterns)
         elif name in ("write_file", "append_file"):
-            arguments.setdefault("workspace_dirs", self.config.tools["workspace_dirs"])
+            arguments.setdefault("workspace_dirs", self.config.tools.workspace_dirs)
 
         try:
             result = fn(**arguments)

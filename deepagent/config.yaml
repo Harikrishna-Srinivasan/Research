@@ -2,28 +2,43 @@
 # Edit this file to customize your agent's behavior.
 
 llm:
+  backend_type: "transformers"
+  llama_cpp:
+    model_path: "google/gemma-3-4b-it" 
+    n_ctx: 2048
+    n_threads: 4
+    n_gpu_layers: 0
+
+  roles_to_models:
+    judge_primary_1: "google/gemma-3-4b-it"
+    judge_primary_2: "unsloth/Qwen3.5-0.8B"
+    judge_backup: "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B"
+    worker_tier_1: "unsloth/Qwen3.5-0.8B"
+    worker_tier_2: "unsloth/Qwen3-1.7B"
+    worker_tier_3: "unsloth/Qwen3.5-2B"
+
   # Primary model — state-of-the-art, downloaded on first run
   model_id: "google/gemma-3-4b-it"
   # Alternatives (uncomment one):
-  #   model_id: "Qwen/Qwen3.5-9B"
+  #   model_id: "unsloth/Qwen3.5-4B-GGUF"
   #   model_id: "Qwen/Qwen3-Coder-Next"
   #   model_id: "mistralai/Ministral-8B-Instruct-2412"
   #   model_id: "meta-llama/Llama-3.1-8B-Instruct"
 
-  # Quantization: "none" (CPU-friendly), "4bit", or "8bit"
-  quantization: "none"
+  # Quantization: "4bit" (CPU-friendly), "8bit", or "none"
+  quantization: "4bit"
   # Max context length (tokens)
   context_length: 8192
   # Generation temperature
   temperature: 0.7
   # Max new tokens per generation
-  max_new_tokens: 1024
+  max_new_tokens: 720
   # Device: "cpu", "cuda", "auto"
   device: "cpu"
 
 agent:
   # Max ReAct iterations per sub-task
-  max_iterations: 50
+  max_iterations: 28
   # Max total time for entire task (minutes)
   max_time_minutes: 180
   # Enable the Critic agent for self-review
@@ -32,14 +47,18 @@ agent:
   enable_breakthrough_detection: true
   # Enable dynamic tool creation by the agent
   enable_tool_creation: true
+  # Assembly line temporal constraints
+  max_research_mins: 60
+  max_gathering_mins: 30
+  max_conclusion_mins: 20
 
 memory:
   # Tokens reserved for short-term sliding window
-  short_term_tokens: 4096
+  short_term_tokens: 2048
   # Directory for persistent ChromaDB vector store
   long_term_db_path: "./memory_store"
   # Embedding model for semantic search
-  embedding_model: "all-MiniLM-L6-v2"
+  embedding_model: "BAAI/bge-small-en-v1.5"
 
 tools:
   # Directories the agent is allowed to read/write
@@ -51,7 +70,7 @@ tools:
   # Enable web search tools
   web_search_enabled: true
   # Max seconds for a single shell command
-  max_command_timeout: 300
+  max_command_timeout: 240
   # Directory where dynamically created tools are stored
   custom_tools_dir: "./custom_tools"
 

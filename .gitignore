@@ -17,7 +17,12 @@ queue/
 CLAUDE.md
 AGENTS.md
 
-# Experimental code/artifacts
+# Environment Variables / Secrets
+.env
+
+# Experimental code / artifacts
+memory_store/
+*.sqlite[3]
 dev/
 
 # Results file
