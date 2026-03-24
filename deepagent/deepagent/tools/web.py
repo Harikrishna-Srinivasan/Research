@@ -1,4 +1,4 @@
-"""Web search and page reading tools — free, no API keys needed."""
+"""Web search and page reading tools. Supports DuckDuckGo (free) and Tavily (requires TAVILY_API_KEY)."""
 
 from __future__ import annotations
 
@@ -130,15 +130,6 @@ WEB_TOOLS = [
             "max_results": {"type": "integer", "description": "Max results", "default": 8},
         },
         "function": web_search,
-    },
-    {
-        "name": "tavily_search",
-        "description": "Search the web using Tavily. Requires TAVILY_API_KEY. Returns titles, URLs, and content snippets.",
-        "parameters": {
-            "query": {"type": "string", "description": "Search query"},
-            "max_results": {"type": "integer", "description": "Max results", "default": 8},
-        },
-        "function": tavily_search,
     },
     {
         "name": "read_webpage",
