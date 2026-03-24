@@ -1,13 +1,54 @@
-"""Web search and page reading tools — free, no API keys needed."""
+"""Web search and page reading tools. Supports DuckDuckGo (free) and Tavily (requires TAVILY_API_KEY)."""
 
 from __future__ import annotations
 
+import os
 import re
 from typing import Optional
 
 
-def web_search(query: str, max_results: int = 8) -> str:
-    """Search the web using DuckDuckGo (free, no API key)."""
+def tavily_search(query: str, max_results: int = 8) -> str:
+    """Search the web using Tavily (requires TAVILY_API_KEY env var)."""
+    try:
+        from tavily import TavilyClient
+
+        api_key = os.environ.get("TAVILY_API_KEY")
+        if not api_key:
+            return "ERROR: TAVILY_API_KEY environment variable not set."
+
+        client = TavilyClient(api_key=api_key)
+        response = client.search(query=query, max_results=max_results)
+
+        results = []
+        for r in response.get("results", []):
+            title = r.get("title", "")
+            url = r.get("url", "")
+            content = r.get("content", "")
+            results.append(f"**{title}**\n{url}\n{content}\n")
+
+        if results:
+            return f"Search results for '{query}':\n\n" + "\n---\n".join(results)
+        return f"No results found for '{query}'"
+    except ImportError:
+        return "ERROR: tavily-python not installed. Run: pip install tavily-python"
+    except Exception as e:
+        return f"ERROR searching: {e}"
+
+
+def web_search(query: str, max_results: int = 8, provider: Optional[str] = None) -> str:
+    """Search the web using the configured provider (DuckDuckGo or Tavily)."""
+    # Determine which provider to use
+    if provider is None:
+        # Auto-detect: use Tavily if TAVILY_API_KEY is set, else DuckDuckGo
+        if os.environ.get("TAVILY_API_KEY"):
+            provider = "tavily"
+        else:
+            provider = "duckduckgo"
+
+    if provider == "tavily":
+        return tavily_search(query, max_results=max_results)
+
+    # Default: DuckDuckGo
     try:
         from duckduckgo_search import DDGS
 
@@ -83,7 +124,7 @@ def read_github_repo(owner: str, repo: str, path: str = "") -> str:
 WEB_TOOLS = [
     {
         "name": "web_search",
-        "description": "Search the web using DuckDuckGo. Returns titles, URLs, and snippets.",
+        "description": "Search the web using the configured provider (DuckDuckGo or Tavily). Returns titles, URLs, and snippets.",
         "parameters": {
             "query": {"type": "string", "description": "Search query"},
             "max_results": {"type": "integer", "description": "Max results", "default": 8},

@@ -210,6 +210,8 @@ class ToolRegistry:
         if name == "run_command":
             arguments.setdefault("allowed_commands", self.config.tools.allowed_commands)
             arguments.setdefault("blocked_patterns", self.config.tools.blocked_patterns)
+        elif name == "web_search":
+            arguments.setdefault("provider", self.config.tools.search_provider)
         elif name in ("write_file", "append_file"):
             arguments.setdefault("workspace_dirs", self.config.tools.workspace_dirs)
 
