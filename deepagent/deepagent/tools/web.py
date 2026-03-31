@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import re
 from typing import Optional
 
@@ -21,6 +22,34 @@ def web_search(query: str, max_results: int = 8) -> str:
         return f"No results found for '{query}'"
     except ImportError:
         return "ERROR: duckduckgo-search not installed. Run: pip install duckduckgo-search"
+    except Exception as e:
+        return f"ERROR searching: {e}"
+
+
+def tavily_web_search(query: str, max_results: int = 8) -> str:
+    """Search the web using Tavily (requires TAVILY_API_KEY env var)."""
+    try:
+        from tavily import TavilyClient
+
+        api_key = os.environ.get("TAVILY_API_KEY")
+        if not api_key:
+            return "ERROR: TAVILY_API_KEY environment variable is not set."
+
+        client = TavilyClient(api_key=api_key)
+        response = client.search(query=query, max_results=max_results)
+
+        results = []
+        for r in response.get("results", []):
+            title = r.get("title", "")
+            url = r.get("url", "")
+            content = r.get("content", "")
+            results.append(f"**{title}**\n{url}\n{content}\n")
+
+        if results:
+            return f"Search results for '{query}':\n\n" + "\n---\n".join(results)
+        return f"No results found for '{query}'"
+    except ImportError:
+        return "ERROR: tavily-python not installed. Run: pip install tavily-python"
     except Exception as e:
         return f"ERROR searching: {e}"
 
@@ -89,6 +118,15 @@ WEB_TOOLS = [
             "max_results": {"type": "integer", "description": "Max results", "default": 8},
         },
         "function": web_search,
+    },
+    {
+        "name": "tavily_web_search",
+        "description": "Search the web using Tavily. Returns titles, URLs, and snippets. Requires TAVILY_API_KEY.",
+        "parameters": {
+            "query": {"type": "string", "description": "Search query"},
+            "max_results": {"type": "integer", "description": "Max results", "default": 8},
+        },
+        "function": tavily_web_search,
     },
     {
         "name": "read_webpage",
