@@ -109,8 +109,9 @@ def read_github_repo(owner: str, repo: str, path: str = "") -> str:
         return f"ERROR reading GitHub repo: {e}"
 
 
-WEB_TOOLS = [
-    {
+# Search provider tools keyed by provider name used in config.tools.web_search_provider
+SEARCH_PROVIDER_TOOLS: dict[str, dict] = {
+    "duckduckgo": {
         "name": "web_search",
         "description": "Search the web using DuckDuckGo. Returns titles, URLs, and snippets.",
         "parameters": {
@@ -119,7 +120,7 @@ WEB_TOOLS = [
         },
         "function": web_search,
     },
-    {
+    "tavily": {
         "name": "tavily_web_search",
         "description": "Search the web using Tavily. Returns titles, URLs, and snippets. Requires TAVILY_API_KEY.",
         "parameters": {
@@ -128,6 +129,10 @@ WEB_TOOLS = [
         },
         "function": tavily_web_search,
     },
+}
+
+# Non-search web tools (always registered)
+WEB_TOOLS = [
     {
         "name": "read_webpage",
         "description": "Fetch and extract text content from a URL as markdown.",
