@@ -1,29 +1,45 @@
-# Python-generated files
+```
+# Database files
+*.sqlite3
+
+# Python
 __pycache__/
-*.py[oc]
-build/
-dist/
-wheels/
-*.egg-info
-
-# Virtual environments
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
 .venv/
-.vscode/
-worktrees/
-results/
-queue/
+.ENV
+.ENV.*
+.python-version
+.pytest_cache/
+.mypy_cache/
+.coverage
+coverage/
 
-# Agent prompt files (generated per-session by launchers)
-CLAUDE.md
-AGENTS.md
+# Build and distribution
+dist/
+build/
+*.egg-info/
+.installed.cfg
+*.egg
 
-# Environment Variables / Secrets
+# Logs
+*.log
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Environment variables
 .env
-
-# Experimental code / artifacts
-memory_store/
-*.sqlite[3]
-dev/
-
-# Results file
-results.tsv
+.env.local
+.env.*
+```

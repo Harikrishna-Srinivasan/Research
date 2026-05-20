@@ -56,6 +56,7 @@ Goal → Planner → [sub-tasks] → Executor (ReAct loop + tools) → Critic �
 | `web_search`, `read_webpage` | DuckDuckGo + page reader |
 | `execute_python` | Run Python code |
 | `search_arxiv`, `search_huggingface` | Research APIs |
+| `search_memory`, `store_memory`, `list_memories` | **Semantic memory search** (CPU-efficient, no API key) |
 | `create_tool` | **Agent creates new tools at runtime** |
 
 ## Examples

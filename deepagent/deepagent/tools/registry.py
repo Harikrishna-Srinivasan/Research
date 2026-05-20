@@ -57,8 +57,9 @@ class ToolRegistry:
         from deepagent.tools.web import WEB_TOOLS
         from deepagent.tools.code_exec import CODE_EXEC_TOOLS
         from deepagent.tools.research import RESEARCH_TOOLS
+        from deepagent.tools.memory_search import MEMORY_TOOLS
 
-        for tool_list in [FILE_TOOLS, SHELL_TOOLS, WEB_TOOLS, CODE_EXEC_TOOLS, RESEARCH_TOOLS]:
+        for tool_list in [FILE_TOOLS, SHELL_TOOLS, WEB_TOOLS, CODE_EXEC_TOOLS, RESEARCH_TOOLS, MEMORY_TOOLS]:
             for t in tool_list:
                 self.register(
                     name=t["name"],
